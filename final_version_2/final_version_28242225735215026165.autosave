@@ -1,0 +1,145 @@
+import processing.video.*;
+import gab.opencv.*;
+
+int cols;
+int rows;
+PVector[] flowField;
+int scale = 80;
+float increase = 0.2;
+float zOffset = 0;
+final int NUM_OF_PARTICLES = 5000;
+Particle[] particles = new Particle[NUM_OF_PARTICLES];
+int[] prevVideoImage;
+Capture video;
+PImage prev;
+
+void setup() {
+   fullScreen(P2D);
+    //size(1400, 900, P2D);
+  
+  cols = (int)(width / scale);
+  rows = (int)(height / scale);
+  System.out.println(cols + " " + rows);
+  flowField = new PVector[cols * rows];
+  
+  for (int i = 0; i < NUM_OF_PARTICLES; i++) {
+    particles[i] = new Particle(1000);
+    particles[i].pColor = color(0, noise(i) * 255, 120);
+  }
+  String[] cameras = Capture.list();
+    // size(1280, 960);
+    // size(640, 480);
+    
+  video = new Capture(this, cameras[0]);
+  video.start();
+    
+  prev = createImage(640, 480, RGB);
+    
+  // size(1400, 900, P2D);  
+  background(0);
+}
+
+void captureEvent(Capture video) {
+    prev.copy(video, 0, 0, video.width, video.height, 0, 0, prev.width, prev.height);
+    prev.updatePixels();
+    video.read();
+}
+
+void draw() {
+  System.out.println(frameRate);
+  
+   video.loadPixels();
+    prev.loadPixels();
+    
+    threshold = 50;   
+    
+    int count = 0; 
+           
+    float avgX = 0;               
+    float avgY = 0;               
+           
+    loadPixels();                        
+           
+    for (int x = 0; x < width; x++) {                     
+        for (int y = 0; y < height; y++) {                          
+            // int loc = x * 2 + (y * width);
+            int loc = x + y * width;    
+            int ratio_x = width / video.width;
+            int ratio_y = height / video.height;
+            int ratio = (ratio_x + ratio_y) / 2;
+            // System.out.println(ratio + " " ratio_x   " " + );
+            if (loc / ratio >= video.pixels.length) {   
+                continue;
+            }
+            // System.out.println(loc + " " + pixels.length + " " + video.pixels.length);
+            // What is current color            
+            color currentColor = video.pixels[loc / ratio];      
+            float r1 = red(currentColor);            
+            float g1 = green(currentColor);       
+            float b1 = blue(currentColor);        
+            color prevColor = prev.pixels[loc / ratio];        
+            float r2 = red(prevColor);          
+            float g2 = green(prevColor);            
+            float b2 = blue(prevColor);             
+                   
+            float d = distSq(r1, g1, b1, r2, g2, b2);                  
+                
+            // scale up loc to the size of the flow field         
+            // loc = x * (width / video.width) + y * (width / video.width);            
+            // loc = loc * (width / video.width);       
+            // System.out.println(loc);    
+            if (d > threshold * threshold) {            
+                //stroke(255);         
+                //strokeWeight(1);                    
+                //point(x, y);          
+                avgX += x;          
+                avgY += y;          
+                count++;            
+                       
+                       
+                //pixels[loc] = color(255);                
+            } else {            
+                // pixels[loc] = color(0);                    
+            }                
+        }                    
+    }                 
+    updatePixels(); 
+  
+  
+  
+  // background(0);
+  float yOffset = 0;
+  for (int y = 0; y < rows; y++) {
+    float xOffset = 0;
+    for (int x = 0; x < cols; x++) {
+      int index = x + y * cols;
+      stroke(0, 10);
+      //pushMatrix();
+
+      double angle = noise(xOffset, yOffset, zOffset) * Math.PI * 5;
+      // PVector v = PVector.fromAngle((float)angle);
+      flowField[index] = PVector.fromAngle((float)angle);
+      flowField[index].setMag(0.3);
+      // System.out.println(v);
+      xOffset += increase;
+
+      // translate(x * scale, y * scale);  
+      // rotate(flowField[index].heading());
+      // stroke(255);
+      // strokeWeight(1);
+       //line(0, 0, scale * 0.6, 0);
+       // popMatrix();
+       //resetMatrix(); 
+    }
+    
+    yOffset += increase;
+    zOffset += 0.0001;
+    // System.out.println(zOffset);
+  }
+  
+  for (int i = 0; i < NUM_OF_PARTICLES; i++) {
+    
+    particles[i].update(flowField, i);
+    particles[i].show();
+  }
+}
