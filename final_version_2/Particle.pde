@@ -62,9 +62,8 @@ class Particle {
         
         // this.red = (int) this.red + (int) (this.velocity.x / 10);
         // this.green = (int) (this.green - this.x / 10);
-        // this.blue = (int) (this.blue - this.y / 10);
-         //<>// //<>//
-        this.pColor = color(this.red, this.green, this.blue); //<>// //<>//
+        // this.blue = (int) (this.blue - this.y / 10); //<>//
+        this.pColor = color(this.red, this.green, this.blue);  //<>//
 
         this.red = this.red + this.red_step * connotation1;
         this.green = this.green + this.green_step * connotation2;
@@ -82,7 +81,7 @@ class Particle {
           connotation3 = connotation3 * -1;
         }
         // this.pColor = color(colorOfSpeed, 224 - this.y / 5, 208 - this.x);
-        float opacityPerling = noise((float)this.x, (float)this.velocity.mag());
+        // float opacityPerling = noise((float)this.x, (float)this.velocity.mag());
         // this.opacity = this.opacity > 150 ? (this.opacity - (int (opacityPerling * 255) / 10)): 255;
         
          

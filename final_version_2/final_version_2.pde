@@ -7,10 +7,10 @@ PVector[] flowField;
 int scale = 80;
 float increase = 0.2;
 float zOffset = 0;
-final int NUM_OF_PARTICLES = 8000;
+final int NUM_OF_PARTICLES = 10000;
 Particle[] particles = new Particle[NUM_OF_PARTICLES];
 
-
+// FINAL VERSION example 1: Experimentation with color
 
 int[] prevVideoImage;
 Capture video;
